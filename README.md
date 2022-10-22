@@ -1,6 +1,6 @@
 # my_app
 
-A new Flutter project.
+Charity Finder based on user preferences
 
 ## Getting Started
 
