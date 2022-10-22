@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_guide/screens/Charitylist_screen.dart';
 import 'package:us_states/us_states.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FormScreen extends StatefulWidget {
   @override
   State<FormScreen> createState() => _FormScreenState();
-  //final Function saveFilters;
-  //final Map<String, bool> currentFilters;
-
-  //FormScreen(this.currentFilters, this.saveFilters);
 }
 
 class _FormScreenState extends State<FormScreen> {
-  bool _dPP = false;
-  bool _govtSupported = false;
-  bool _fundraisingOrganization = false;
+  bool _govtSupported = true;
+  bool _fundraisingOrganization = true;
+  String _chosenStateValue;
+  String _city = "";
+  String _scopeofWork;
+  String _sortResults;
+  String _categoryName;
+  bool _ratedCharities = true;
+  var categoryIds = <String, int> {"Any": 0, "Animals": 1, "Art, Culture and Humanties": 2,"Community Development": 3, "Education": 4, 
+  "Environment": 5, "Health": 6, "Human and Civil Rights": 7, "Human Services": 8, "International": 9, "Religion": 10,"Research and Public Policy": 11};
+  bool _loading = true;
   
   initState() {
-    // _dPP = widget.currentFilters['DPP'];
-    //_govtSupported = widget.currentFilters['govtsupported'];
-    //_fundraisingOrganization = widget.currentFilters['fundraisingorganization'];
-    super.initState();
+      super.initState();
+      _RetrieveData();
   }
 
   // Store the data in sharedpref
@@ -30,22 +33,38 @@ class _FormScreenState extends State<FormScreen> {
       prefs.setString('state', _chosenStateValue == null? "" : _chosenStateValue);
       prefs.setString('city', _city == null? "" : _city);
       prefs.setString('scopeofWork', _scopeofWork == null? "ALL" : _scopeofWork);
-      prefs.setString('sortResults', _sortResults == null? "RATING" : _sortResults);
+      prefs.setString('sortResults', _sortResults == null? "RATING:DESC" : _sortResults + ":DESC");
       prefs.setBool('ratedCharities', _ratedCharities == null ? true : _ratedCharities);
-      prefs.setBool('dPP', _dPP== null? true:_dPP);
       prefs.setBool('govtSupported', _govtSupported == null? true : _govtSupported);
       prefs.setBool('fundraisingOrganization', _fundraisingOrganization == null? true: _govtSupported);
+      int categoryID = categoryIds[_categoryName];
+      prefs.setInt('categoryID', _categoryName == null? 0: categoryID);
     });
-
-    print(" Found: " + prefs.getString('state'));
+   
   }
 
-  String _chosenStateValue;
-  String _city = "";
-  String _scopeofWork;
-  String _sortResults;
-  String _categoryId;
-  bool _ratedCharities;
+    // Store the data in sharedpref
+  Future<void> _RetrieveData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+      _chosenStateValue= prefs.getString('state');
+      _city = prefs.getString('city');
+      _scopeofWork = prefs.getString('scopeofWork');
+  
+      _sortResults = prefs.getString('sortResults').split(":")[0];
+      _ratedCharities = prefs.getBool('ratedCharities');
+      _govtSupported = prefs.getBool('govtSupported');
+      _fundraisingOrganization = prefs.getBool('fundraisingOrganization');
+      int _categoryId = prefs.getInt('categoryID');
+      _categoryName = ( _categoryId== 0) ? null : categoryIds.entries.firstWhere((element) => element.value == _categoryId).key;
+
+       setState(() {
+      _loading = false;
+    });
+
+  }
+
+  
   Widget _buildSwitchListTile(
     String title,
     String description,
@@ -64,6 +83,7 @@ class _FormScreenState extends State<FormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if(_loading) return CircularProgressIndicator();
     return Scaffold(
         appBar: AppBar(
           title: Text("Welcome to Charity Finder"),
@@ -100,11 +120,12 @@ class _FormScreenState extends State<FormScreen> {
                           _chosenStateValue = value;
                       });
                     }),
-                TextField(
+                TextFormField(
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      hintText: 'Enter City name',
+                      hintText: 'Enter City name [Optional]',
                     ),
+                    initialValue: _city,
                     onChanged: (text) {
                       setState(() {
                         _city = text;
@@ -142,18 +163,7 @@ class _FormScreenState extends State<FormScreen> {
                         _scopeofWork = "ALL";
                       });
                     }),
-                _buildSwitchListTile(
-                  "Donor Privacy Policy",
-                  "Show only organizations that have donor privacy policy",
-                  _dPP,
-                  (newValue) {
-                    setState(
-                      () {
-                        _dPP = newValue;
-                      },
-                    );
-                  },
-                ),
+           /*
                 _buildSwitchListTile(
                   "No Govt Support",
                   "Show only charities that do not receive government support.",
@@ -165,7 +175,7 @@ class _FormScreenState extends State<FormScreen> {
                       },
                     );
                   },
-                ),/*
+                ),*/
                 _buildSwitchListTile(
                   "Fundraising Organizations",
                   "Show only charities that are fundraising organizations.",
@@ -189,11 +199,10 @@ class _FormScreenState extends State<FormScreen> {
                       },
                     );
                   },
-                ),*/
+                ),
                 DropdownButton<String>(
-                    value: _categoryId,
+                    value: _categoryName,
                     items: [
-                      "Any",
                       "Animals", // 1
                       "Art, Culture and Humanties", //2
                       "Community Development", // 3
@@ -224,12 +233,12 @@ class _FormScreenState extends State<FormScreen> {
                     onChanged: (String value) {
                       setState(() {
                         if (value != null) {
-                          _categoryId = value;
+                          _categoryName = value;
                         } else {
-                          _categoryId = "Any";
+                          _categoryName = "Any";
                         }
                       });
-                    }),
+                    }),/*
                 DropdownButton<String>(
                     value: _sortResults,
                     items: [
@@ -258,11 +267,12 @@ class _FormScreenState extends State<FormScreen> {
                         _sortResults = value; else
                         _sortResults = "RATING";
                       });
-                    }),
+                    }),*/
                     ElevatedButton(
                         onPressed: ()  {
                           setState(() {
                             _storeData();
+                            Navigator.of(context).pushNamed(CharityList.routeName);
                           });
                         },
                         child: const Text('Submit'),
@@ -273,12 +283,3 @@ class _FormScreenState extends State<FormScreen> {
   }
 }
 
-/*
-          Container(child: Text("hello2")),
-          Container(child: Text("hello3")),
-          Container(child: Text("hello")),
-          Container(child: Text("hello")),
-          Container(child: Text("hello")),
-          Container(child: Text("hello")),
-          Container(child: Text("hello")),
-          Container(child: Text("hello")),*/

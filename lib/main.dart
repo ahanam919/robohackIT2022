@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import './screens/form_screen.dart';
 import './screens/Charitylist_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -34,7 +34,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _loadPrefs();
   }
 
 
@@ -63,7 +62,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
       initialRoute: '/', // default is '/'
       routes: {
-        '/': (ctx) => CharityList()//FormScreen(),
+        '/': (ctx) => FormScreen(),
+        CharityList.routeName: (ctx) =>
+            CharityList(),
             },
       onGenerateRoute: (settings) {
         print(settings.arguments);
