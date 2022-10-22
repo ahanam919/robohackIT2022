@@ -1,24 +1,41 @@
 import 'package:flutter/material.dart';
 
 import './screens/form_screen.dart';
+import './screens/Charitylist_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
+  const MyApp();
+
+  // This widget is the root of the application.
   @override
-  _MyAppState createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      title: 'Charity Finder',
+      home: MyHomePage(title: 'Charity Finder'),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({this.title});
 
+  final String title;
 
-  void _setFilters(Map<String, bool> filterData) {
-    setState(() {
-      
-    });
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
   }
-
-  
 
 
   @override
@@ -43,10 +60,10 @@ class _MyAppState extends State<MyApp> {
               fontWeight: FontWeight.bold,
             )),
       ),
-      // home: CategoriesScreen(),
+
       initialRoute: '/', // default is '/'
       routes: {
-        '/': (ctx) => FormScreen(),
+        '/': (ctx) => CharityList()//FormScreen(),
             },
       onGenerateRoute: (settings) {
         print(settings.arguments);

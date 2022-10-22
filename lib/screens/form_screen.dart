@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:us_states/us_states.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FormScreen extends StatefulWidget {
   @override
@@ -20,6 +21,23 @@ class _FormScreenState extends State<FormScreen> {
     //_govtSupported = widget.currentFilters['govtsupported'];
     //_fundraisingOrganization = widget.currentFilters['fundraisingorganization'];
     super.initState();
+  }
+
+  // Store the data in sharedpref
+  Future<void> _storeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setString('state', _chosenStateValue == null? "" : _chosenStateValue);
+      prefs.setString('city', _city == null? "" : _city);
+      prefs.setString('scopeofWork', _scopeofWork == null? "ALL" : _scopeofWork);
+      prefs.setString('sortResults', _sortResults == null? "RATING" : _sortResults);
+      prefs.setBool('ratedCharities', _ratedCharities == null ? true : _ratedCharities);
+      prefs.setBool('dPP', _dPP== null? true:_dPP);
+      prefs.setBool('govtSupported', _govtSupported == null? true : _govtSupported);
+      prefs.setBool('fundraisingOrganization', _fundraisingOrganization == null? true: _govtSupported);
+    });
+
+    print(" Found: " + prefs.getString('state'));
   }
 
   String _chosenStateValue;
@@ -79,7 +97,7 @@ class _FormScreenState extends State<FormScreen> {
                     ),
                     onChanged: (String value) {
                       setState(() {
-                        _chosenStateValue = value;
+                          _chosenStateValue = value;
                       });
                     }),
                 TextField(
@@ -118,7 +136,10 @@ class _FormScreenState extends State<FormScreen> {
                     ),
                     onChanged: (String value) {
                       setState(() {
-                        _scopeofWork = value;
+                        if (value!= null) 
+                        _scopeofWork = value; 
+                        else
+                        _scopeofWork = "ALL";
                       });
                     }),
                 _buildSwitchListTile(
@@ -144,7 +165,7 @@ class _FormScreenState extends State<FormScreen> {
                       },
                     );
                   },
-                ),
+                ),/*
                 _buildSwitchListTile(
                   "Fundraising Organizations",
                   "Show only charities that are fundraising organizations.",
@@ -156,7 +177,7 @@ class _FormScreenState extends State<FormScreen> {
                       },
                     );
                   },
-                ),/*
+                ),
                  _buildSwitchListTile(
                   "Rated Charities",
                   "Show only rated charities",
@@ -202,7 +223,11 @@ class _FormScreenState extends State<FormScreen> {
                     ),
                     onChanged: (String value) {
                       setState(() {
-                        _categoryId = value;
+                        if (value != null) {
+                          _categoryId = value;
+                        } else {
+                          _categoryId = "Any";
+                        }
                       });
                     }),
                 DropdownButton<String>(
@@ -229,9 +254,19 @@ class _FormScreenState extends State<FormScreen> {
                     ),
                     onChanged: (String value) {
                       setState(() {
-                        _sortResults = value;
+                        if(value != null)
+                        _sortResults = value; else
+                        _sortResults = "RATING";
                       });
                     }),
+                    ElevatedButton(
+                        onPressed: ()  {
+                          setState(() {
+                            _storeData();
+                          });
+                        },
+                        child: const Text('Submit'),
+                      ),
                     
               ])
         ])));
