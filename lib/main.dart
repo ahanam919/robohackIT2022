@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
+import './screens/homescreen.dart';
 import './screens/form_screen.dart';
 import './screens/Charitylist_screen.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -36,7 +35,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -62,14 +60,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
       initialRoute: '/', // default is '/'
       routes: {
-        '/': (ctx) => FormScreen(),
-        CharityList.routeName: (ctx) =>
-            CharityList(),
-            },
+        '/': (ctx) => HomeScreen(),
+        CharityList.routeName: (ctx) => CharityList(),
+      },
       onGenerateRoute: (settings) {
         print(settings.arguments);
-       
-        return MaterialPageRoute(builder: (ctx) => FormScreen(),);
+
+        return MaterialPageRoute(
+          builder: (ctx) => FormScreen(),
+        );
       },
       onUnknownRoute: (settings) {
         return MaterialPageRoute(

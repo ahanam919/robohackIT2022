@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:flutter_complete_guide/screens/form_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -68,12 +69,11 @@ Future<List<CharityDetail>> fetchCharities() async {
 
   print(Urlbuild);
   final response = await http.get(Uri.parse(Urlbuild));
-      print(response.body);
+  print(response.body);
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
     List jsonResponse = jsonDecode(response.body);
-
 
     return jsonResponse.map((job) => new CharityDetail.fromJson(job)).toList();
   } else {
@@ -101,11 +101,18 @@ class _CharityListState extends State<CharityList> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fetch Data Example',
+      title: 'Charity List',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
+         floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed(FormScreen.routeName);
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.settings),
+      ),
         appBar: AppBar(
           title: const Text('Selected Charities'),
         ),
@@ -116,41 +123,73 @@ class _CharityListState extends State<CharityList> {
               if (snapshot.hasData) {
                 return Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: GridView.builder(
-                        itemCount: snapshot.data.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                        ),
-                        itemBuilder: (BuildContext context, int i) {
-                          return Card(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 0.5, color: Colors.grey)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: SingleChildScrollView(
-                                    child: Column(
-                                  children: <Widget>[
-                                    Text(
-                                        "NAME:" + snapshot.data[i].charityName),
-                                    Text("TAGLINE:" + snapshot.data[i].tagLine),
-                                    Text("CAUSE:" +
-                                        snapshot.data[i].cause.causeName),
-                                    Image.network(snapshot.data[i].currentRating
-                                        .ratingimage.large),
-                                    ElevatedButton(
-                                        onPressed: () async {
-                                          await launchTarget(snapshot
-                                              .data[i].charityNavigatorURL);
-                                        },
-                                        child: Text("More"))
-                                  ],
-                                )),
-                              ),
+                    child: Scrollbar(
+                        thumbVisibility: true,
+                        thickness: 9.0,
+                        child: GridView.builder(
+                            itemCount: snapshot.data.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 1,
+                              childAspectRatio: 2,
                             ),
-                          );
-                        }));
+                            itemBuilder: (BuildContext context, int i) {
+                              return Card(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          width: 0.5, color: Colors.grey)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SingleChildScrollView(
+                                        child: Column(
+                                      children: <Widget>[
+                                        Text(snapshot.data[i].charityName,
+                                            style: GoogleFonts.archivoBlack(
+                                                textStyle: TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 40, 81, 228),
+                                              fontSize: 25,
+                                            )),
+                                            textAlign: TextAlign.center),
+                                        Text(snapshot.data[i].tagLine,
+                                            style: GoogleFonts.robotoCondensed(
+                                                textStyle: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500,
+                                            )),
+                                            textAlign: TextAlign.center),
+                                        Text(
+                                          snapshot.data[i].cause.causeName,
+                                          style: GoogleFonts.workSans(
+                                              textStyle: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            backgroundColor: Color.fromARGB(
+                                                145, 119, 147, 199),
+                                          )),
+                                        ),
+                                        Image.network(snapshot.data[i]
+                                            .currentRating.ratingimage.large),
+                                        ElevatedButton(
+                                            onPressed: () async {
+                                              await launchTarget(snapshot
+                                                  .data[i].charityNavigatorURL);
+                                            },
+                                            child: Text(
+                                              "More",
+                                              style: GoogleFonts.poppins(
+                                                  textStyle: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              )),
+                                            ))
+                                      ],
+                                    )),
+                                  ),
+                                ),
+                              );
+                            })));
               } else if (snapshot.hasError) {
                 return Text('${snapshot.error}');
               }
